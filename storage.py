@@ -58,7 +58,10 @@ def get_time_filtered_objects(objects: list, time: int):
 
 
 def get_document_data(doc_ref):
-    return doc_ref.get().to_dict()[DATA]
+    try:
+        return doc_ref.get().to_dict()[DATA]
+    except Exception:
+        return []
 
 
 def get_document_reference(party, collection, subcollection):
