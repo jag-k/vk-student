@@ -15,17 +15,17 @@ TIME = "time"
 DATA = "str"
 
 
-def add_data(collection: str, data: str, subcollection="root", party: str = '_'):
+def add_data(collection: str, data: str, subcollection="root"):
     # TODO: add various exception catching
-    doc_ref = get_document_reference(party, collection, subcollection)
+    doc_ref = get_document_reference(collection, subcollection)
 
     add_new_data(doc_ref, data)
 
     return "ok"
 
 
-def get_data(collection: str, subcollection="root", time: int = None, party: str = ''):
-    doc_ref = get_document_reference(party, collection, subcollection)
+def get_data(collection: str, subcollection="root", time: int = None):
+    doc_ref = get_document_reference(collection, subcollection)
     objects = get_document_data(doc_ref)
 
     if time is None:
@@ -58,12 +58,15 @@ def get_time_filtered_objects(objects: list, time: int):
 
 
 def get_document_data(doc_ref):
-    return doc_ref.get().to_dict()[DATA]
+    try:
+        return doc_ref.get().to_dict()[DATA]
+    except Exception:
+        return []
 
 
-def get_document_reference(party, collection, subcollection):
+def get_document_reference(collection, subcollection):
     return db\
-        .collection(party+'_'+collection)\
+        .collection(collection)\
         .document(subcollection)
 
 
