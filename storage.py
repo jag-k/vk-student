@@ -1,9 +1,10 @@
 import time as py_time
 
 from firebase_admin import credentials, initialize_app, firestore
+from google.cloud.firestore_v1 import DocumentReference
 
 from config import FIREBASE_APP_CONFIG, FIREBASE_APP_NAME
-
+from models.party import PLAN_FREE, Party
 
 credential = credentials.Certificate(FIREBASE_APP_CONFIG)
 token = credential.get_access_token().access_token
@@ -13,6 +14,8 @@ db = firestore.client(app)
 
 TIME = "time"
 DATA = "str"
+
+COLLECTION_PARTIES = "parties"
 
 
 def add_data(collection: str, data: str, subcollection="root"):
@@ -32,6 +35,27 @@ def get_data(collection: str, subcollection="root", time: int = None):
         return get_last_object(objects)
     else:
         return get_time_filtered_objects(objects, time)
+
+
+def add_party(party: str, plan=PLAN_FREE):
+    set_party(Party(party, plan))
+
+    return "ok"
+
+
+def get_party(party: str):
+    ref = get_party_reference(party)
+
+    return get_party_model(ref)
+
+
+def set_party(party: Party):
+    doc_ref = get_party_reference(party.name)
+    doc_ref.set(
+        party.to_dict()
+    )
+
+    return "ok"
 
 
 def add_new_data(doc_ref, data: str):
@@ -58,6 +82,7 @@ def get_time_filtered_objects(objects: list, time: int):
 
 
 def get_document_data(doc_ref):
+    # noinspection PyBroadException
     try:
         return doc_ref.get().to_dict()[DATA]
     except Exception:
@@ -72,3 +97,15 @@ def get_document_reference(collection, subcollection):
 
 def get_current_time():
     return int(round(py_time.time()))
+
+
+def get_party_model(party_reference) -> Party:
+    doc = party_reference.get().to_dict()
+
+    return Party.from_dict(doc)
+
+
+def get_party_reference(party_name) -> DocumentReference:
+    return db\
+        .collection(COLLECTION_PARTIES)\
+        .document(party_name)

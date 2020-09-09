@@ -21,7 +21,7 @@ USAGE_LIMITS = {
 
 
 class Party:
-    def __init__(self, name, plan, request_count, usage):
+    def __init__(self, name, plan, request_count=0, usage=0):
         self.name = name
         self.plan = plan
         self.request_count = request_count
@@ -35,6 +35,14 @@ class Party:
             orig["request_count"],
             orig["usage"]
         )
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "plan": self.plan,
+            "request_count": self.request_count,
+            "usage": self.usage
+        }
 
     @property
     def is_something_reached(self):
