@@ -8,6 +8,8 @@ from config import VK_CHAT_API_KEY, VK_GROUP_ID
 from controller import add_data, get_data
 
 # TODO: add localisation
+CHAT_AUTH = ["#аут"]
+
 DATA_SET = ["#запиши"]
 DATA_GET = ["#дай"]
 DATA_EDITING_METHODS = DATA_SET + DATA_GET
@@ -19,25 +21,27 @@ def write_msg(chat_id, message):
     vk.method('messages.send', {'random_id': random.randint(1, 2147483647), 'chat_id': chat_id, 'message': message})
 
 
-def is_setting_data(message):
+def is_something(message, arr):
     return any(map(
-        lambda word: word in DATA_SET,
+        lambda word: word in arr,
         message.split()
     ))
+
+
+def is_setting_data(message):
+    return is_something(message, DATA_SET)
 
 
 def is_getting_data(message):
-    return any(map(
-        lambda word: word in DATA_GET,
-        message.split()
-    ))
+    return is_something(message, DATA_GET)
 
 
 def is_using_data(message):
-    return any(map(
-        lambda word: word in DATA_EDITING_METHODS,
-        message.split()
-    ))
+    return is_something(message, DATA_EDITING_METHODS)
+
+
+def is_chat_auth(message):
+    return is_something(message, CHAT_AUTH)
 
 
 def on_new_task(message, party, chat_id):
