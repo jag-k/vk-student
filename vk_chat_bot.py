@@ -4,7 +4,7 @@ import vk_api
 from vk_api.bot_longpoll import VkBotEventType as VkEventType
 from vk_api.bot_longpoll import VkBotLongPoll as VkLongPoll
 
-from config import VK_API_KEY, VK_GROUP_ID
+from config import VK_CHAT_API_KEY, VK_GROUP_ID
 from controller import add_data, get_data
 
 # TODO: add localisation
@@ -33,37 +33,37 @@ def is_getting_data(message):
     ))
 
 
-def is_editing_data(message):
+def is_using_data(message):
     return any(map(
         lambda word: word in DATA_EDITING_METHODS,
         message.split()
     ))
 
 
-def on_new_task(message, party, user_id):
-    if is_editing_data(message):
-        on_editing_data(message, party, user_id)
+def on_new_task(message, party, chat_id):
+    if is_using_data(message):
+        on_using_data(message, party, chat_id)
     else:
         on_error(WRONG_TASK)
 
 
-def on_editing_data(message, party, user_id):
+def on_using_data(message, party, chat_id):
     if is_setting_data(message):
-        on_setting_data(message, party, user_id)
+        on_setting_data(message, party, chat_id)
     elif is_getting_data(message):
-        on_getting_data(message, party, user_id)
+        on_getting_data(message, party, chat_id)
 
 
-def on_setting_data(message, party, user_id):
+def on_setting_data(message, party, chat_id):
     collections, data = parse_task(message)
 
     if len(collections) >= 2:
-        write_msg(user_id, add_data(collections[0], data, "".join(collections[1:]), party=party))
+        write_msg(chat_id, add_data(collections[0], data, "".join(collections[1:]), party=party))
     else:
-        write_msg(user_id, add_data(collections[0], data, party=party))
+        write_msg(chat_id, add_data(collections[0], data, party=party))
 
 
-def on_getting_data(message, party, user_id):  # TODO: add time
+def on_getting_data(message, party, chat_id):  # TODO: add time
     collections, other = parse_task(message)
 
     if len(collections) >= 2:
@@ -72,9 +72,9 @@ def on_getting_data(message, party, user_id):  # TODO: add time
         data = get_data(collections[0], party=party)
 
     if len(data) > 0:
-        write_msg(user_id, data[0]["str"])
+        write_msg(chat_id, data[0]["str"])
     else:
-        write_msg(user_id, "пусто")
+        write_msg(chat_id, "пусто")
 
 
 def on_error(error_name: str):
@@ -109,6 +109,6 @@ def start_main_loop(longpoll):
 
 
 if __name__ == '__main__':
-    vk = vk_api.VkApi(token=VK_API_KEY)
+    vk = vk_api.VkApi(token=VK_CHAT_API_KEY)
 
     start_main_loop(VkLongPoll(vk, group_id=VK_GROUP_ID))
