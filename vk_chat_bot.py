@@ -6,6 +6,7 @@ from vk_api.bot_longpoll import VkBotLongPoll as VkLongPoll
 
 from config import VK_CHAT_API_KEY, VK_GROUP_ID
 from controller import add_data, get_data, set_party, get_party
+from storage import ROOT_SUBCOLLECTION
 
 # TODO: add localisation
 DATA_SET = ["/запиши"]
@@ -28,6 +29,11 @@ INFO = \
 ALL_METHODS = DATA_EDITING_METHODS + INFO_METHOD
 
 WRONG_TASK = "wt"  # wtf
+
+EMPTY_RESULT = "пусто"
+ERROR_UNAUTHORISED_CHAT = "Чат не зарегестрирован, нужен зарегестрированный юзер чтобы зарегестрировать чат" \
+                          " (пусть зарегестрированный юзер вызовет любую команду бота)"
+ADD_NEW_CHAT = lambda chat_count: f"К вам привязан новый чат, количество привязанных к вам чатов: {chat_count}"
 
 
 def write_msg(chat_id, message):
@@ -68,7 +74,7 @@ def on_new_task(message, user_id, chat_id):
         try:
             on_chat_auth(user_id, chat_id)
         except Exception:
-            write_msg(chat_id, "The chat is not registered, I need a registered user to register the chat")
+            write_msg(chat_id, ERROR_UNAUTHORISED_CHAT)
             return
 
     if is_using_data(message):
@@ -93,24 +99,20 @@ def on_info(chat_id):
 def on_setting_data(message, party, chat_id):
     collections, data = parse_task(message)
 
-    if len(collections) >= 2:
-        write_msg(chat_id, add_data(collections[0], data, "".join(collections[1:]), party=party))
-    else:
-        write_msg(chat_id, add_data(collections[0], data, party=party))
+    subcollection = "".join(collections[1:]) if len(collections) >= 2 else ROOT_SUBCOLLECTION
+
+    write_msg(chat_id, add_data(collections[0], data, subcollection, party=party))
 
 
 def on_getting_data(message, party, chat_id):  # TODO: add time
     collections, other = parse_task(message)
 
-    if len(collections) >= 2:
-        data = get_data(collections[0], "".join(collections[1:]), party=party)
-    else:
-        data = get_data(collections[0], party=party)
+    subcollection = "".join(collections[1:]) if len(collections) >= 2 else ROOT_SUBCOLLECTION
 
-    if len(data) > 0:
-        write_msg(chat_id, data[0]["str"])
-    else:
-        write_msg(chat_id, "пусто")
+    data = get_data(collections[0], subcollection, party=party)
+    data = data[0]["str"] if len(data) > 0 else EMPTY_RESULT
+
+    write_msg(chat_id, data)
 
 
 def on_chat_auth(user_id, chat_id):
@@ -119,7 +121,7 @@ def on_chat_auth(user_id, chat_id):
     party.request_count += 2
 
     set_party(party)
-    write_msg(chat_id, f"Added new chat to your account, your chat count: {len(party.chats)}")
+    write_msg(chat_id, ADD_NEW_CHAT(len(party.chats)))
 
 
 def on_error(error_name: str):

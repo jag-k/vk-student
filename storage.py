@@ -17,19 +17,22 @@ DATA = "str"
 
 COLLECTION_PARTIES = "parties"
 
+ROOT_SUBCOLLECTION = "root"
+OK_RESULT = "ok"
+
 party_collection = db.collection(COLLECTION_PARTIES)
 
 
-def add_data(collection: str, data: str, subcollection="root"):
+def add_data(collection: str, data: str, subcollection=ROOT_SUBCOLLECTION):
     # TODO: add various exception catching
     doc_ref = get_document_reference(collection, subcollection)
 
     add_new_data(doc_ref, data)
 
-    return "ok"
+    return OK_RESULT
 
 
-def get_data(collection: str, subcollection="root", time: int = None):
+def get_data(collection: str, subcollection=ROOT_SUBCOLLECTION, time: int = None):
     doc_ref = get_document_reference(collection, subcollection)
     objects = get_document_data(doc_ref)
 
@@ -42,7 +45,7 @@ def get_data(collection: str, subcollection="root", time: int = None):
 def add_party(party: str, plan=PLAN_FREE):
     set_party(Party(party, plan))
 
-    return "ok"
+    return OK_RESULT
 
 
 def get_party(party: str = None, chat: str = None):
@@ -62,7 +65,7 @@ def set_party(party: Party):
         party.to_dict()
     )
 
-    return "ok"
+    return OK_RESULT
 
 
 def add_new_data(doc_ref, data: str):

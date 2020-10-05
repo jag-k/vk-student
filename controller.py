@@ -1,8 +1,10 @@
 import storage
 from models.party import PLAN_FREE, Party
 
+ACCESS_DENIED_RESULT = "Вы не можете сделать этого"
 
-def add_data(collection: str, data: str, subcollection="root", party: str = ''):
+
+def add_data(collection: str, data: str, subcollection=storage.ROOT_SUBCOLLECTION, party: str = ''):
     if check_access(party):
         update_party_usage_amount(party, 1, len(data))
 
@@ -12,10 +14,10 @@ def add_data(collection: str, data: str, subcollection="root", party: str = ''):
             subcollection
         )
     else:
-        return "Access denied"
+        return ACCESS_DENIED_RESULT
 
 
-def get_data(collection: str, subcollection="root", time: int = None, party: str = ''):
+def get_data(collection: str, subcollection=storage.ROOT_SUBCOLLECTION, time: int = None, party: str = ''):
     if check_access(party):
         update_party_usage_amount(party, 1, 0)
 
@@ -25,7 +27,7 @@ def get_data(collection: str, subcollection="root", time: int = None, party: str
             time
         )
     else:
-        return "Access denied"
+        return ACCESS_DENIED_RESULT
 
 
 def add_party(party: str, plan=PLAN_FREE):
