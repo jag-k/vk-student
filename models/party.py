@@ -1,11 +1,13 @@
 import math
 
+PLAN_NONE = -2
 PLAN_ADMIN = -1
 PLAN_FREE = 0
 PLAN_EXTENDED = 1
 PLAN_PREMIUM = 2
 
 REQUEST_LIMITS = {  # TODO: move to some config?
+    PLAN_NONE: 0,
     PLAN_ADMIN: math.inf,
     PLAN_FREE: 60,
     PLAN_EXTENDED: 300,
@@ -13,6 +15,7 @@ REQUEST_LIMITS = {  # TODO: move to some config?
 }
 
 USAGE_LIMITS = {
+    PLAN_NONE: 0,
     PLAN_ADMIN: math.inf,
     PLAN_FREE: 3000,
     PLAN_EXTENDED: 12000,
