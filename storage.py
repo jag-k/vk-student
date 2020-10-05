@@ -17,6 +17,8 @@ DATA = "str"
 
 COLLECTION_PARTIES = "parties"
 
+party_collection = db.collection(COLLECTION_PARTIES)
+
 
 def add_data(collection: str, data: str, subcollection="root"):
     # TODO: add various exception catching
@@ -106,6 +108,4 @@ def get_party_model(party_reference) -> Party:
 
 
 def get_party_reference(party_name) -> DocumentReference:
-    return db\
-        .collection(COLLECTION_PARTIES)\
-        .document(party_name)
+    return party_collection.document(party_name)
