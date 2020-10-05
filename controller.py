@@ -32,8 +32,12 @@ def add_party(party: str, plan=PLAN_FREE):
     return storage.add_party(party, plan)
 
 
-def get_party(party: str):
-    return storage.get_party(party)
+def get_party(party: str = None, chat: str = None):
+    return storage.get_party(party=party, chat=chat)
+
+
+def set_party(party: Party):
+    return storage.set_party(party)
 
 
 def update_party_usage_amount(name: str, request_count=0, usage=0):
