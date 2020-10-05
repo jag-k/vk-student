@@ -21,11 +21,14 @@ USAGE_LIMITS = {
 
 
 class Party:
-    def __init__(self, name, plan, request_count=0, usage=0):
-        self.name = name
+    def __init__(self, name, plan, request_count=0, usage=0, chats: list = None):
+        if chats is None:
+            chats = []
+        self.name = str(name)
         self.plan = plan
         self.request_count = request_count
         self.usage = usage
+        self.chats = chats
 
     @staticmethod
     def from_dict(orig):
@@ -33,7 +36,8 @@ class Party:
             orig["name"],
             orig["plan"],
             orig["request_count"],
-            orig["usage"]
+            orig["usage"],
+            orig["chats"]
         )
 
     def to_dict(self):
@@ -41,7 +45,8 @@ class Party:
             "name": self.name,
             "plan": self.plan,
             "request_count": self.request_count,
-            "usage": self.usage
+            "usage": self.usage,
+            "chats": self.chats
         }
 
     @property
