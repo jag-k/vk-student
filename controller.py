@@ -37,17 +37,13 @@ def get_party(party: str):
 
 
 def update_party_usage_amount(name: str, request_count=0, usage=0):
-    party = get_party(name)
-    new_party = Party(
-        name,
-        party.plan,
-        party.request_count + request_count,
-        party.usage + usage
-    )
+    party = get_party(party=name)
+    party.request_count += request_count
+    party.usage += usage
 
-    storage.set_party(new_party)
+    storage.set_party(party)
 
-    return new_party
+    return party
 
 
 def check_access(party_name) -> bool:
