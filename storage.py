@@ -73,7 +73,10 @@ def add_new_data(doc_ref, data: str):
 
 
 def get_last_object(objects: list):
-    return [max(objects, key=lambda obj: obj[TIME])]
+    try:
+        return [max(objects, key=lambda obj: obj[TIME])]
+    except ValueError:
+        return []
 
 
 def get_time_filtered_objects(objects: list, time: int):
