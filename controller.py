@@ -1,7 +1,7 @@
 import storage
 from models.party import PLAN_FREE, Party
 
-ACCESS_DENIED_RESULT = "Вы не можете сделать этого"
+ACCESS_DENIED_RESULT = "Вы не можете сделать этого, лимиты исчерпаны"
 
 
 def add_data(collection: str, data: str, subcollection=storage.ROOT_SUBCOLLECTION, party: str = ''):
@@ -27,7 +27,7 @@ def get_data(collection: str, subcollection=storage.ROOT_SUBCOLLECTION, time: in
             time
         )
     else:
-        return ACCESS_DENIED_RESULT
+        return [{"str": ACCESS_DENIED_RESULT}]
 
 
 def add_party(party: str, plan=PLAN_FREE):

@@ -1,4 +1,6 @@
 import random
+import re
+from datetime import datetime
 
 import vk_api
 from vk_api.bot_longpoll import VkBotEventType as VkEventType
@@ -17,7 +19,7 @@ INFO_METHOD = ["/инфо"]
 INFO = \
     """ Команды:
     /запиши <адрес> <информация>
-    /дай <адрес>
+    /дай <адрес> <время в формате ДД.ММ.ГГ, если не указывать, то вернёт последнюю запись>
     
     Примеры:
     пользователь: /запиши дневник-стр1 сегодня я впервые воспользовался ботом для хранения данных
@@ -107,10 +109,19 @@ def on_setting_data(message, party, chat_id):
 def on_getting_data(message, party, chat_id):  # TODO: add time
     collections, other = parse_task(message)
 
+    time = parse_time(other) if other != "" else None
     subcollection = "".join(collections[1:]) if len(collections) >= 2 else ROOT_SUBCOLLECTION
 
-    data = get_data(collections[0], subcollection, party=party)
-    data = data[0]["str"] if len(data) > 0 else EMPTY_RESULT
+    if time is not None:
+        data = get_data(collections[0], subcollection, time, party)
+    else:
+        data = get_data(collections[0], subcollection, party=party)
+
+    data = '\n'.join([
+        (str(datetime.fromtimestamp(i["time"])) + ": " if time is not None else "") + i["str"]
+        for i in data
+    ]) \
+        if len(data) > 0 else EMPTY_RESULT
 
     write_msg(chat_id, data)
 
@@ -144,6 +155,16 @@ def parse_task(task):
     return collections, other
 
 
+def parse_time(time_str: str):  # TODO: add more cases
+    # TODO: refactor, mb move to module with all cases
+    if re.match("\\d\\d\\.\\d\\d\\.\\d\\d\\d\\d", time_str):
+        return int(datetime.strptime(time_str, "%d.%m.%Y").timestamp())
+    elif re.match("\\d\\d\\.\\d\\d\\.\\d\\d", time_str):
+        return int(datetime.strptime(time_str, "%d.%m.%y").timestamp())
+    else:
+        return None
+
+
 # TODO: create singleton MainLooper?
 def start_main_loop(longpoll):
     while True:
@@ -152,7 +173,8 @@ def start_main_loop(longpoll):
             for event in longpoll.listen():
                 if event.type == VkEventType.MESSAGE_NEW:
                     on_new_task(event.object["text"], event.object["from_id"], event.chat_id)
-        except Exception:  # TODO: add exception catching
+        except Exception as e:  # TODO: add exception catching
+            print(e)
             pass
 
 
