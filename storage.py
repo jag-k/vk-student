@@ -45,10 +45,15 @@ def add_party(party: str, plan=PLAN_FREE):
     return "ok"
 
 
-def get_party(party: str):
-    ref = get_party_reference(party)
-
-    return get_party_model(ref)
+def get_party(party: str = None, chat: str = None):
+    if party is not None:
+        ref = get_party_reference(party)
+        return get_party_model(ref)
+    elif chat is not None:
+        ref = get_party_by_chat(chat)
+        return Party.from_dict(ref.to_dict())  # TODO: refactor
+    else:
+        raise Exception()
 
 
 def set_party(party: Party):
@@ -112,3 +117,7 @@ def get_party_model(party_reference) -> Party:
 
 def get_party_reference(party_name) -> DocumentReference:
     return party_collection.document(party_name)
+
+
+def get_party_by_chat(chat):
+    return party_collection.where("chats", "array_contains", chat).limit(1).get()[0]
