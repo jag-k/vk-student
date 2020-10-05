@@ -1,11 +1,13 @@
 import math
 
+PLAN_NONE = -2
 PLAN_ADMIN = -1
 PLAN_FREE = 0
 PLAN_EXTENDED = 1
 PLAN_PREMIUM = 2
 
 REQUEST_LIMITS = {  # TODO: move to some config?
+    PLAN_NONE: 0,
     PLAN_ADMIN: math.inf,
     PLAN_FREE: 60,
     PLAN_EXTENDED: 300,
@@ -13,6 +15,7 @@ REQUEST_LIMITS = {  # TODO: move to some config?
 }
 
 USAGE_LIMITS = {
+    PLAN_NONE: 0,
     PLAN_ADMIN: math.inf,
     PLAN_FREE: 3000,
     PLAN_EXTENDED: 12000,
@@ -21,11 +24,14 @@ USAGE_LIMITS = {
 
 
 class Party:
-    def __init__(self, name, plan, request_count=0, usage=0):
-        self.name = name
+    def __init__(self, name, plan, request_count=0, usage=0, chats: list = None):
+        if chats is None:
+            chats = []
+        self.name = str(name)
         self.plan = plan
         self.request_count = request_count
         self.usage = usage
+        self.chats = chats
 
     @staticmethod
     def from_dict(orig):
@@ -33,7 +39,8 @@ class Party:
             orig["name"],
             orig["plan"],
             orig["request_count"],
-            orig["usage"]
+            orig["usage"],
+            orig["chats"]
         )
 
     def to_dict(self):
@@ -41,7 +48,8 @@ class Party:
             "name": self.name,
             "plan": self.plan,
             "request_count": self.request_count,
-            "usage": self.usage
+            "usage": self.usage,
+            "chats": self.chats
         }
 
     @property

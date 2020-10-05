@@ -17,17 +17,22 @@ DATA = "str"
 
 COLLECTION_PARTIES = "parties"
 
+ROOT_SUBCOLLECTION = "root"
+OK_RESULT = "ok"
 
-def add_data(collection: str, data: str, subcollection="root"):
+party_collection = db.collection(COLLECTION_PARTIES)
+
+
+def add_data(collection: str, data: str, subcollection=ROOT_SUBCOLLECTION):
     # TODO: add various exception catching
     doc_ref = get_document_reference(collection, subcollection)
 
     add_new_data(doc_ref, data)
 
-    return "ok"
+    return OK_RESULT
 
 
-def get_data(collection: str, subcollection="root", time: int = None):
+def get_data(collection: str, subcollection=ROOT_SUBCOLLECTION, time: int = None):
     doc_ref = get_document_reference(collection, subcollection)
     objects = get_document_data(doc_ref)
 
@@ -40,13 +45,18 @@ def get_data(collection: str, subcollection="root", time: int = None):
 def add_party(party: str, plan=PLAN_FREE):
     set_party(Party(party, plan))
 
-    return "ok"
+    return OK_RESULT
 
 
-def get_party(party: str):
-    ref = get_party_reference(party)
-
-    return get_party_model(ref)
+def get_party(party: str = None, chat: str = None):
+    if party is not None:
+        ref = get_party_reference(party)
+        return get_party_model(ref)
+    elif chat is not None:
+        ref = get_party_by_chat(chat)
+        return Party.from_dict(ref.to_dict())  # TODO: refactor
+    else:
+        raise Exception()
 
 
 def set_party(party: Party):
@@ -55,7 +65,7 @@ def set_party(party: Party):
         party.to_dict()
     )
 
-    return "ok"
+    return OK_RESULT
 
 
 def add_new_data(doc_ref, data: str):
@@ -71,7 +81,10 @@ def add_new_data(doc_ref, data: str):
 
 
 def get_last_object(objects: list):
-    return [max(objects, key=lambda obj: obj[TIME])]
+    try:
+        return [max(objects, key=lambda obj: obj[TIME])]
+    except ValueError:
+        return []
 
 
 def get_time_filtered_objects(objects: list, time: int):
@@ -106,6 +119,8 @@ def get_party_model(party_reference) -> Party:
 
 
 def get_party_reference(party_name) -> DocumentReference:
-    return db\
-        .collection(COLLECTION_PARTIES)\
-        .document(party_name)
+    return party_collection.document(party_name)
+
+
+def get_party_by_chat(chat):
+    return party_collection.where("chats", "array_contains", chat).limit(1).get()[0]
